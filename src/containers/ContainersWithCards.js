@@ -3,7 +3,7 @@ import Containers from '../components/Containers'
 
 const mapStateToProps = (state) => {
   return {
-    state: state.moveCards
+    state: state.reducer
   }
 }
 

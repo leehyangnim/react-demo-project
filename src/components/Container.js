@@ -1,5 +1,8 @@
 import React from 'react'
 import Card from './Card'
+import { pushCard } from '../actions'
+import { DropTarget } from 'react-dnd';
+import { connect } from 'react-redux'
 
 const style = {
   height: 500,
@@ -12,14 +15,42 @@ const style = {
 	flexDirection: 'column'
 }
 
-const Container = ({cards}) => (
-  <div style={style}>
-      {cards.map( (card, index) => {
-      return (
-        <Card content={card.content} key={index} />
-      )
-    })}
-  </div>
+const containerTarget = {
+  drop(props, monitor, component ) {
+		const { containerId } = props;
+		const sourceObj = monitor.getItem();
+		if ( containerId !== sourceObj.containerId ){
+			props.dispatch(pushCard(sourceObj));
+		}
+		return {
+			containerId: containerId
+		};
+
+	}
+}
+
+const Container = ({cards, containerId, connectDropTarget}) => (
+    connectDropTarget(
+    <div style={style}>
+        {cards.map( (card, index) => {
+        return (
+          <Card content={card.content} key={card.id} index={index} containerId={containerId} card={card}/>
+        )
+      })}
+    </div>
+  )
 )
 
-export default Container
+function mapStateToProps(state) {
+  // console.log(state); // state
+  return {
+    state: state
+  }
+}
+
+Container = DropTarget("CARD", containerTarget, (connect, monitor) => ({
+	connectDropTarget: connect.dropTarget(),
+	isOver: monitor.isOver(),
+	canDrop: monitor.canDrop()
+}))(Container);
+export default connect(mapStateToProps)(Container);
